@@ -1,23 +1,33 @@
-Create a vector function that ranks founder groups by their team composition and dynamics.
+A vector.function that ranks founder groups by their team dynamics, composition, and complementarity.
 
-Input schema:
-- type: object with 'items' property
-- items: array of founder groups (each group is an array of founder objects)
-- minItems: 2
-- Each founder object has: name (string), age (integer), gender (string), city (string), role (string), percent_equity (integer), technical_founder (boolean), in_school (boolean), commit_exclusively (boolean), education (array), work_history (array), hacked_system (string), impressive_thing (string), built_things (string), accolades (string)
-- Required fields per founder: name, role, percent_equity, technical_founder, in_school, commit_exclusively
+Input Schema (MUST MATCH EXACTLY - use these exact property names):
+- items: array of founder groups, each team is an array of founder objects
+- Each founder object has:
+  - name: string (required)
+  - role: string (required) - e.g., CEO, CTO
+  - percent_equity: integer (required)
+  - technical_founder: boolean (required)
+  - in_school: boolean (required)
+  - commit_exclusively: boolean (required)
+  - age: integer (optional)
+  - gender: string (optional)
+  - city: string (optional)
+  - education: array of objects with properties {institution: string, degree: string, field: string, year: integer} (optional)
+  - work_history: array of objects with properties {company: string, title: string, start_year: integer, end_year: integer, description: string} (optional)
+  - hacked_system: string (optional)
+  - impressive_thing: string (optional)
+  - built_things: string (optional)
+  - accolades: string (optional)
 
-This is a vector function that outputs a probability distribution across founder groups.
+IMPORTANT: education items use 'institution' (not 'school') and 'year' (not 'graduation_year')
+IMPORTANT: work_history items use 'title' (not 'role')
 
-Evaluate team composition and dynamics by examining:
-1. Skill complementarity - building, selling, domain expertise coverage
-2. Equity distribution health - roughly equal splits suggest mutual respect, very small stakes are concerning
-3. Commitment alignment - all commit_exclusively true, mixed in_school status
-4. Team size appropriateness - 2-3 founders often ideal, 4+ requires justification
-5. Geographic considerations - co-located teams execute better, startup ecosystem locations help
-6. Prior working relationships - evidence from overlapping work history
+Evaluation criteria:
+1. Role clarity and non-overlapping responsibilities
+2. Complementary skill sets (technical + business)
+3. Equity distribution fairness and alignment
+4. Mix of technical and non-technical founders
+5. Clear leadership structure
+6. Diversity of backgrounds and perspectives
 
-Strong signals: Clear role differentiation, healthy equity distribution, universal commitment, complementary skills, co-location
-Concerning patterns: All founders same skillset, equity dysfunction, mixed commitment, obvious gaps, fragmented geography
-
-Select the ONE team with the healthiest composition and dynamics.
+Output: Probability distribution over founder groups

@@ -1,6 +1,6 @@
 {
   "type": "vector.function",
-  "description": "Rank founder groups by team composition and dynamics. Returns a probability distribution where higher values indicate healthier team dynamics. Evaluates commitment alignment, skill complementarity, equity distribution health, prior relationships, geographic considerations, and team size across 14 dimensions.",
+  "description": "Rank founder groups by team dynamics, composition, and complementarity. Returns a probability distribution over teams with higher scores indicating stronger team composition. Evaluates role clarity, skill complementarity, equity alignment, commitment levels, leadership structure, and diversity across multiple dimensions.",
   "input_schema": {
     "type": "object",
     "description": "Input for ranking founder groups by team composition and dynamics",
@@ -62,16 +62,20 @@
                   "type": "object",
                   "properties": {
                     "institution": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Name of the educational institution"
                     },
                     "degree": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Type of degree (e.g., BS, MS, MBA, PhD)"
                     },
                     "field": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Field of study"
                     },
-                    "graduation_year": {
-                      "type": "integer"
+                    "year": {
+                      "type": "integer",
+                      "description": "Graduation year"
                     }
                   }
                 }
@@ -83,23 +87,31 @@
                   "type": "object",
                   "properties": {
                     "company": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Name of the company"
                     },
                     "title": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Job title held"
                     },
                     "start_year": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Year the position started"
                     },
                     "end_year": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Year the position ended"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description of responsibilities and accomplishments"
                     }
                   }
                 }
               },
               "hacked_system": {
                 "type": "string",
-                "description": "Description of creative problem-solving"
+                "description": "Description of creative problem-solving or system circumvention"
               },
               "impressive_thing": {
                 "type": "string",

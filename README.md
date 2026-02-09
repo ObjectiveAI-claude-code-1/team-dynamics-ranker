@@ -1,64 +1,29 @@
-# team-dynamics-ranker
+# Team Dynamics Ranker
 
-A vector function that ranks founder groups by their team composition and dynamics. Returns a probability distribution where higher values indicate healthier team dynamics.
+A vector.function that ranks founder groups by their team dynamics, composition, and complementarity. Returns a probability distribution over teams with higher scores indicating stronger team composition.
 
-## Overview
+## Purpose
 
-This function evaluates founding teams across 14 dimensions organized into 6 categories to determine which team has the healthiest composition and dynamics for startup success.
+Evaluating team quality is one of the most subjective aspects of startup assessment. This function brings rigor and consistency to team evaluation by decomposing the holistic judgment of "great team" into constituent dimensions: role clarity, skill complementarity, equity alignment, commitment signals, diversity of perspective, and leadership structure.
 
 ## Input
 
-```json
-{
-  "items": [
-    [
-      {
-        "name": "Alice Chen",
-        "role": "CEO",
-        "percent_equity": 50,
-        "technical_founder": false,
-        "in_school": false,
-        "commit_exclusively": true,
-        "age": 32,
-        "gender": "Female",
-        "city": "San Francisco",
-        "education": [{"institution": "Stanford GSB", "degree": "MBA", "field": "Business", "graduation_year": 2018}],
-        "work_history": [{"company": "Stripe", "title": "Product Manager", "start_year": 2018, "end_year": 2023}],
-        "built_things": "Led launch of Stripe Atlas expansion",
-        "impressive_thing": "Grew product from $10M to $50M ARR"
-      },
-      {
-        "name": "Bob Park",
-        "role": "CTO",
-        "percent_equity": 50,
-        "technical_founder": true,
-        "in_school": false,
-        "commit_exclusively": true
-      }
-    ],
-    [
-      // Another founder group...
-    ]
-  ]
-}
-```
+The function accepts an array of founder groups to compare. Each group is an array of founder objects with:
 
-### Founder Object Fields
-
-**Required:**
+### Required Fields
 - `name` (string): Founder's name
 - `role` (string): Declared role (CEO, CTO, COO, Co-founder, etc.)
-- `percent_equity` (integer): Ownership stake (0-100)
-- `technical_founder` (boolean): Whether founder has technical/engineering capability
+- `percent_equity` (integer 0-100): Ownership stake
+- `technical_founder` (boolean): Whether founder has technical capability
 - `in_school` (boolean): Whether founder is currently a student
 - `commit_exclusively` (boolean): Whether founder is committed full-time
 
-**Optional:**
+### Optional Fields
 - `age` (integer): Founder's age
 - `gender` (string): Founder's gender
 - `city` (string): Current city of residence
-- `education` (array): Educational background
-- `work_history` (array): Work experience
+- `education` (array): Educational background with institution, degree, field, year
+- `work_history` (array): Work experience with company, title, start_year, end_year, description
 - `hacked_system` (string): Description of creative problem-solving
 - `impressive_thing` (string): Most impressive prior achievement
 - `built_things` (string): Description of things they've built
@@ -66,56 +31,72 @@ This function evaluates founding teams across 14 dimensions organized into 6 cat
 
 ## Output
 
-Returns a probability distribution (array of numbers summing to ~1.0) where each value corresponds to a founder group in the input. Higher values indicate healthier team dynamics.
+A probability distribution over the input founder groups, where higher values indicate stronger team dynamics and composition. Scores sum to approximately 1.0.
 
 ## Evaluation Dimensions
 
-### 1. Commitment Alignment (Priority 1)
-- **Exclusive Commitment**: All founders fully dedicated to the venture
-- **School Status Alignment**: Consistent academic status (all in school or all out)
+The function evaluates teams across 15 dimensions:
 
-### 2. Skill Complementarity (Priority 2)
-- **Technical Founder Presence**: At least one founder can build the product
-- **Builder-Seller Differentiation**: Technical + business skills complement each other
-- **Role Clarity**: Distinct, non-overlapping roles enable parallel execution
-- **Background Diversity**: Cognitive diversity through varied backgrounds
-
-### 3. Equity Distribution Health (Priority 3)
-- **Equity Fairness**: Splits reflect mutual respect (roughly equal for peers)
-- **Equity-Role Coherence**: Stakes match declared roles and contributions
-
-### 4. Prior Relationships (Priority 4)
-- **Prior Working Relationship**: Evidence of successful collaboration history
-
-### 5. Geographic Considerations (Priority 5)
-- **Co-location**: All founders in the same city
-- **Ecosystem Access**: Located in major startup hubs
-
-### 6. Team Size (Priority 6)
-- **Appropriateness**: 2-3 founders is ideal; 4+ requires justification
-
-### 7. Holistic Assessment
-- **Execution Evidence**: Track record of building and shipping
-- **Overall Team Health**: Coherent unit with no disqualifying red flags
-
-## Strong Signals
-- Clear role differentiation
-- Healthy equity distribution
-- Universal exclusive commitment
-- Complementary skills (builder + seller)
-- Co-location in startup ecosystems
-- Prior working relationships
-
-## Concerning Patterns
-- All founders with same skillset
-- Equity dysfunction (80%+ for one, single digits for others)
-- Mixed commitment levels
-- No technical founder
-- Fragmented geography
-- 5+ founders without clear differentiation
+1. **Exclusive Commitment Alignment** - All founders committed full-time
+2. **School Status Alignment** - Consistent academic status across team
+3. **Technical Founder Presence** - At least one builder on the team
+4. **Builder-Seller Differentiation** - Complementary technical and commercial skills
+5. **Role Clarity and Differentiation** - Distinct, well-defined roles
+6. **Equity Distribution Fairness** - Equitable ownership that passes the resentment test
+7. **Equity-Role Coherence** - Stakes match declared roles and contributions
+8. **Prior Working Relationship** - Evidence of successful prior collaboration
+9. **Geographic Co-location** - Founders in same city for optimal execution
+10. **Startup Ecosystem Access** - Location in major startup hubs
+11. **Team Size Appropriateness** - 2-3 founders in the sweet spot
+12. **Background Diversity** - Cognitive diversity from varied backgrounds
+13. **Execution Evidence** - Track record of building and shipping
+14. **Holistic Team Health** - Overall coherence and capability
 
 ## Use Cases
-- Accelerator/incubator application screening
-- Investment due diligence
-- Team formation guidance
-- Co-founder compatibility assessment
+
+- **Investor Screening**: Surface teams with strong compositional fundamentals
+- **Founder Self-Assessment**: Identify gaps in team composition
+- **Accelerator Cohort Composition**: Ensure diversity of team compositions
+- **Research and Analysis**: Control for team composition in startup studies
+
+## Example
+
+```json
+{
+  "items": [
+    [
+      {
+        "name": "Sarah Chen",
+        "role": "CEO",
+        "percent_equity": 55,
+        "technical_founder": false,
+        "in_school": false,
+        "commit_exclusively": true,
+        "education": [{"institution": "Stanford", "degree": "MBA", "field": "Business", "year": 2018}],
+        "work_history": [{"company": "Stripe", "title": "Head of Partnerships", "start_year": 2018, "end_year": 2023}]
+      },
+      {
+        "name": "Marcus Johnson",
+        "role": "CTO",
+        "percent_equity": 45,
+        "technical_founder": true,
+        "in_school": false,
+        "commit_exclusively": true,
+        "built_things": "Open source ML framework with 5k GitHub stars"
+      }
+    ],
+    [
+      {
+        "name": "Solo Founder",
+        "role": "Founder",
+        "percent_equity": 100,
+        "technical_founder": true,
+        "in_school": true,
+        "commit_exclusively": false
+      }
+    ]
+  ]
+}
+```
+
+The function would rank the first team higher due to complementary skills, full commitment, and diverse backgrounds.

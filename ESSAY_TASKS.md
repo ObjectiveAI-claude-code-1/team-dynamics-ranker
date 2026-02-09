@@ -1,433 +1,267 @@
 # Team Dynamics Ranker: Task Definitions
 
-This document defines the evaluation tasks that comprise the team-dynamics-ranker function. Each task corresponds to a specific dimension of team composition and dynamics evaluation, as outlined in ESSAY.md. Tasks are ordered by priority according to the Hierarchy of Concerns.
+This document defines the evaluation tasks for the **team-dynamics-ranker** function. Each task evaluates founder groups on a specific dimension of team quality, producing a comparative ranking across all input teams.
 
 ---
 
-## Task 1: Exclusive Commitment Alignment
+## Task 1: Role Distinctness and Non-Overlap
 
-**Dimension**: Commitment Alignment (Priority 1)
+**Evaluation Focus**: Assess whether each founder has a distinct, clearly-defined role that does not overlap with other founders on the team.
 
-**Purpose**: Evaluate whether all founders have committed exclusively to the venture, indicating aligned skin in the game.
+**What to Evaluate**:
+- Do founders have distinct titles that map to distinct functional areas?
+- Are there redundant roles (e.g., two CTOs, multiple "Co-Founder" designations without differentiation)?
+- Does role assignment match the founder's background and skill set?
+- Is there functional coverage across essential domains (product/engineering, business/operations)?
 
-**Evaluation Criteria**:
-- Check the `commit_exclusively` field for all founders in the group
-- All founders with `commit_exclusively: true` indicates strong alignment
-- Mixed commitment levels (some true, some false) indicate concerning asymmetry
-- Consider that commitment asymmetry breeds resentment and fractures decision-making
-
-**Strong Signals (HIGH)**:
-- All founders have `commit_exclusively: true`
-- Evidence of burned bridges in work history (quit stable jobs)
-- Relocations to work together
-
-**Concerning Signals (LOW)**:
-- Mixed `commit_exclusively` values within the team
-- Founders maintaining other jobs or commitments
-- "Advisors" with founder equity but no exclusive commitment
-
-**Binary Choice**: LOW (mixed or absent exclusive commitment) vs HIGH (universal exclusive commitment)
+**Decision Criteria**:
+- **HIGH**: Each founder has a distinct role with clear functional ownership. No redundancy or ambiguity. Roles match backgrounds and together cover essential startup functions.
+- **LOW**: Multiple founders claim the same function, roles are generic or undifferentiated, or there are obvious gaps in functional coverage despite having multiple founders.
 
 ---
 
-## Task 2: School Status Alignment
+## Task 2: Technical Capability Presence
 
-**Dimension**: Commitment Alignment (Priority 1)
+**Evaluation Focus**: Assess whether the founding team has sufficient technical capability to build the core product without excessive external dependency.
 
-**Purpose**: Evaluate whether founders have aligned academic status, as mixed school/non-school teams face structural friction.
+**What to Evaluate**:
+- Is there at least one founder marked as `technical_founder: true`?
+- Do the technical founders have relevant educational backgrounds (CS, engineering, sciences)?
+- Do the technical founders have work history demonstrating building capability?
+- Is there evidence of technical depth in `built_things` or `impressive_thing` fields?
 
-**Evaluation Criteria**:
-- Check the `in_school` field for all founders
-- All founders in school together = aligned cohort (acceptable)
-- All founders not in school = full-time alignment (ideal)
-- Mixed in_school status = commitment mismatch (concerning)
-
-**Strong Signals (HIGH)**:
-- All founders have `in_school: false` (full-time availability)
-- All founders have `in_school: true` (cohort with aligned constraints)
-- Consistent academic status across the team
-
-**Concerning Signals (LOW)**:
-- Some founders in school, others not
-- Part-time students paired with full-time founders
-- School commitments that will compete with startup demands
-
-**Binary Choice**: LOW (mixed school status) vs HIGH (aligned school status—all in or all out)
+**Decision Criteria**:
+- **HIGH**: At least one technical founder with credible technical background (education and/or work history). Evidence of actual building capability through projects, products, or technical accomplishments.
+- **LOW**: No technical founders, or technical designation lacks supporting evidence in education, work history, or demonstrated builds. Team would be dependent on contractors or future hires for core product development.
 
 ---
 
-## Task 3: Technical Founder Presence
+## Task 3: Commercial Capability Presence
 
-**Dimension**: Skill Complementarity (Priority 2)
+**Evaluation Focus**: Assess whether the founding team has sufficient commercial capability to sell the product, raise capital, and navigate business relationships.
 
-**Purpose**: Evaluate whether the team has at least one technical founder who can build the product.
+**What to Evaluate**:
+- Is there at least one founder with business-oriented background (CEO, sales, marketing, operations roles in work history)?
+- Do any founders have MBA or business-adjacent education?
+- Is there evidence of previous startup experience, especially in commercial roles?
+- Do role assignments include business-focused positions (CEO, COO, Head of Sales)?
 
-**Evaluation Criteria**:
-- Check the `technical_founder` field across the team
-- At least one `technical_founder: true` is essential for most startups
-- Multiple technical founders may be appropriate for deep-tech plays
-- Zero technical founders is a critical gap for technology companies
-
-**Strong Signals (HIGH)**:
-- At least one founder with `technical_founder: true`
-- Technical founder holds meaningful equity stake
-- Technical capability evident from work history or built_things
-
-**Concerning Signals (LOW)**:
-- No founder with `technical_founder: true`
-- All founders are non-technical (all business backgrounds)
-- Outsourced technical capacity with founder equity
-
-**Binary Choice**: LOW (no technical founder) vs HIGH (technical founder present)
+**Decision Criteria**:
+- **HIGH**: At least one founder with demonstrated commercial capability through work history (sales, marketing, BD, general management) or education (MBA, business degrees). Evidence of previous customer acquisition, fundraising, or deal-making.
+- **LOW**: All founders are technical with no commercial experience. No founder has work history or education suggesting ability to sell, raise capital, or manage business operations.
 
 ---
 
-## Task 4: Builder-Seller Differentiation
+## Task 4: Technical-Commercial Complementarity
 
-**Dimension**: Skill Complementarity (Priority 2)
+**Evaluation Focus**: Assess whether the team achieves genuine complementarity between technical and commercial capabilities, rather than clustering in one domain.
 
-**Purpose**: Evaluate whether the team has clear role differentiation between building (product/engineering) and selling (business/commercial) functions.
+**What to Evaluate**:
+- Does the team have a healthy mix of `technical_founder: true` and `technical_founder: false`?
+- Do non-technical founders bring genuinely different skills rather than just lacking technical skills?
+- Is there coverage across both building and selling capabilities?
+- Do founders' backgrounds suggest they will approach problems differently?
 
-**Evaluation Criteria**:
-- Examine roles, technical_founder flags, and work history for skill signals
-- Classic pairing: technical founder + business/commercial founder
-- Look for evidence of complementary rather than overlapping skills
-- Consider whether the team can both build AND sell
-
-**Strong Signals (HIGH)**:
-- Clear technical + business pairing (e.g., CTO + CEO with sales background)
-- Roles that indicate complementary functions (not all "Co-founder" or all "CEO")
-- Work history showing different domain expertise
-- Evidence of prior shipping AND prior selling
-
-**Concerning Signals (LOW)**:
-- All founders with identical backgrounds (three engineers, four MBAs)
-- Roles that overlap without complementing (two CTOs, three "visionaries")
-- No commercial/business founder in a complex sales environment
-- Skills that duplicate rather than complete each other
-
-**Binary Choice**: LOW (poor differentiation or skill gaps) vs HIGH (clear builder-seller complementarity)
+**Decision Criteria**:
+- **HIGH**: Clear complementarity with at least one strong technical founder and at least one founder with commercial/operational capability. Different backgrounds suggest cognitive diversity. Team can both build and sell.
+- **LOW**: Team is homogeneous—either all technical or all commercial. Skill overlap without coverage. Founders have similar backgrounds and would likely approach problems identically.
 
 ---
 
-## Task 5: Role Clarity and Differentiation
+## Task 5: Equity Distribution Alignment
 
-**Dimension**: Skill Complementarity (Priority 2)
+**Evaluation Focus**: Assess whether equity distribution reflects appropriate differentiation based on role, contribution, and commitment, avoiding both problematic equality and problematic inequality.
 
-**Purpose**: Evaluate whether founders have distinct, clearly defined roles that enable parallel execution.
+**What to Evaluate**:
+- Does the CEO/lead founder have the largest or tied-largest equity stake?
+- Are equity stakes differentiated in a way that matches role seniority?
+- Do all founders have meaningful stakes (>5-10% for full-time founders)?
+- Is there evidence of avoided hard conversations (perfectly equal splits in non-equal teams)?
 
-**Evaluation Criteria**:
-- Examine the `role` field for each founder
-- Look for distinct functional roles (CEO, CTO, COO, CPO, etc.)
-- Watch for role confusion signals (multiple CEOs, vague titles)
-- Consider whether roles match founder backgrounds
-
-**Strong Signals (HIGH)**:
-- Distinct roles across founders (CEO + CTO + COO pattern)
-- Roles that match technical_founder status and work history
-- Clear division of responsibilities evident from role titles
-- Solo founder with clear singular leadership (100% equity)
-
-**Concerning Signals (LOW)**:
-- Multiple founders with same or similar roles
-- Vague roles like "Co-founder" without functional specification
-- Role titles that don't match evident backgrounds
-- All founders claiming CEO or "visionary" status
-
-**Binary Choice**: LOW (role confusion or overlap) vs HIGH (clear role differentiation)
+**Decision Criteria**:
+- **HIGH**: Equity distribution reflects role differentiation with lead founder holding largest stake. All founders have meaningful equity. Distribution suggests thoughtful conversation about relative value contribution.
+- **LOW**: Equity distribution is problematic—either exactly equal in a clearly non-equal team (suggesting conflict avoidance), or so unequal that some founders have trivial stakes despite being expected to commit fully.
 
 ---
 
-## Task 6: Equity Distribution Fairness
+## Task 6: Equity-Commitment Alignment
 
-**Dimension**: Equity Distribution Health (Priority 3)
+**Evaluation Focus**: Assess whether equity stakes align with commitment levels as indicated by `commit_exclusively` and `in_school` flags.
 
-**Purpose**: Evaluate whether the equity split reflects mutual respect and will pass the "resentment test" over time.
+**What to Evaluate**:
+- Do founders with higher equity stakes have `commit_exclusively: true`?
+- Are there founders with significant equity who are not committing exclusively?
+- Are there founders committing exclusively but holding trivial equity?
+- Does the `in_school` status appropriately correlate with equity and expected contribution?
 
-**Evaluation Criteria**:
-- Examine `percent_equity` across all founders
-- Roughly equal splits (50/50, 33/33/34, 40/40/20) suggest mutual respect
-- Very small stakes for ostensible co-founders (single digits) are concerning
-- Solo founders with 100% is healthy (clear authority)
-- Equity should roughly correspond to role seniority and commitment
-
-**Strong Signals (HIGH)**:
-- Roughly equal splits among co-founders (within 20% of each other)
-- Deviations that match clear experience/role differences
-- Solo founder with 100% (clear decision-making authority)
-- No founder with less than 10% unless clearly an advisor/minor role
-
-**Concerning Signals (LOW)**:
-- One founder with 80%+ while peers have minimal stakes
-- Co-founders with single-digit equity (suggests exploitation or miscalibration)
-- Equity splits that contradict role descriptions
-- Very equal splits among many founders (suggests non-decision/indecision)
-
-**Binary Choice**: LOW (concerning equity distribution) vs HIGH (healthy equity distribution)
+**Decision Criteria**:
+- **HIGH**: Equity and commitment are well-aligned. Founders with the most equity are committing exclusively. Part-time or student founders have appropriately smaller stakes. No mismatches between expected contribution and ownership.
+- **LOW**: Significant equity-commitment misalignment. Founders with large stakes not committing exclusively, or fully-committed founders holding trivial equity. Structure suggests future conflict over contribution and ownership.
 
 ---
 
-## Task 7: Equity-Role Coherence
+## Task 7: Leadership Clarity
 
-**Dimension**: Equity Distribution Health (Priority 3)
+**Evaluation Focus**: Assess whether there is a clear leadership structure with an unambiguous decision-maker, typically a CEO.
 
-**Purpose**: Evaluate whether equity stakes are coherent with declared roles and implied contributions.
+**What to Evaluate**:
+- Is exactly one founder designated as CEO?
+- Does the CEO have the largest or tied-largest equity stake?
+- Are there problematic structures like co-CEOs or no designated CEO?
+- Does the role hierarchy suggest clear authority (CEO > CTO > other roles)?
 
-**Evaluation Criteria**:
-- Compare `percent_equity` against `role` and other signals
-- CEO typically should have meaningful stake if leading
-- Technical founders should have equity reflecting their building contribution
-- Equity should tell a coherent story about relative value
-
-**Strong Signals (HIGH)**:
-- Lead role (CEO) corresponds with meaningful equity stake
-- Technical founders have equity proportional to building responsibility
-- Equity distribution tells a coherent story matching roles
-- No obvious mismatches between title and stake
-
-**Concerning Signals (LOW)**:
-- CEO with tiny equity stake (who really leads?)
-- Technical founder with minimal equity (will they stay?)
-- Equity splits that contradict the role structure
-- "Advisor" equity levels for people with "Founder" titles
-
-**Binary Choice**: LOW (equity-role mismatch) vs HIGH (equity-role coherence)
+**Decision Criteria**:
+- **HIGH**: One founder is clearly designated as CEO with supporting equity stake. Role hierarchy implies clear decision-making authority. No ambiguity about ultimate leadership.
+- **LOW**: Multiple CEOs, no CEO designated (only "Co-Founder" titles), or equity distribution contradicts stated leadership (CEO has significantly less equity than others). Leadership structure suggests conflict or deadlock risk.
 
 ---
 
-## Task 8: Prior Working Relationship Evidence
+## Task 8: Leader Credibility
 
-**Dimension**: Prior Relationships (Priority 4)
+**Evaluation Focus**: Assess whether the designated leader (CEO) has credible background and experience for the leadership role.
 
-**Purpose**: Evaluate whether founders have evidence of successful prior collaboration.
+**What to Evaluate**:
+- Does the CEO's work history include leadership or management experience?
+- Does the CEO's education or accomplishments suggest capability for the role?
+- Is there evidence of previous founder experience or entrepreneurial success?
+- Do the CEO's `accolades`, `impressive_thing`, or `hacked_system` suggest leadership capability?
 
-**Evaluation Criteria**:
-- Examine `work_history` for overlapping companies or time periods
-- Look for shared education institutions or locations
-- Consider `built_things` that might reference shared projects
-- Founder relationships are marriages with money—prior collaboration reduces risk
-
-**Strong Signals (HIGH)**:
-- Overlapping companies in work_history
-- Shared educational institutions at same time periods
-- References to joint projects in built_things or other fields
-- Long-term geographic proximity suggesting established relationship
-- Evidence of having weathered professional challenges together
-
-**Concerning Signals (LOW)**:
-- No overlap in work_history or educational background
-- Founders from completely different industries/locations
-- No evidence of prior collaboration
-- Very recent relationship (startup-dating pattern)
-
-**Binary Choice**: LOW (no prior relationship evidence) vs HIGH (clear prior relationship signals)
+**Decision Criteria**:
+- **HIGH**: The designated leader has credible background for the CEO role—previous management experience, founder experience, or demonstrated leadership through accomplishments. Background suggests ability to lead the team and represent the company externally.
+- **LOW**: The designated leader lacks experience or evidence of leadership capability. First-time founder in CEO role with no management background and no compensating evidence of exceptional capability.
 
 ---
 
-## Task 9: Geographic Co-location
+## Task 9: Educational Diversity
 
-**Dimension**: Geographic Considerations (Priority 5)
+**Evaluation Focus**: Assess whether the founding team has diversity in educational backgrounds—different institutions, fields of study, and degree types.
 
-**Purpose**: Evaluate whether founders are co-located for optimal early-stage execution.
+**What to Evaluate**:
+- Do founders come from different educational institutions?
+- Do founders have degrees in different fields (technical, business, humanities, sciences)?
+- Is there a mix of degree levels (undergraduate, graduate, PhD)?
+- Does educational diversity suggest exposure to different perspectives and approaches?
 
-**Evaluation Criteria**:
-- Examine `city` field for all founders
-- All founders in same city = ideal co-location
-- Founders distributed across cities = execution friction
-- Consider proximity even if not same city (adjacent metros)
-
-**Strong Signals (HIGH)**:
-- All founders in the same city
-- All founders in same metropolitan area
-- Evidence of relocation to work together (city matches recent work_history change)
-- Solo founder (co-location not applicable)
-
-**Concerning Signals (LOW)**:
-- Founders distributed across multiple cities
-- International distribution across time zones
-- No evidence of plans to consolidate
-- Major cities with poor connectivity (e.g., SF + Singapore)
-
-**Binary Choice**: LOW (distributed team) vs HIGH (co-located team)
+**Decision Criteria**:
+- **HIGH**: Founders have diverse educational backgrounds—different institutions, different fields of study, different degree types. Educational diversity suggests exposure to varied intellectual traditions and approaches.
+- **LOW**: Founders have homogeneous educational backgrounds—same institution, same field, same degree type. Educational clustering suggests similar intellectual formation and potential groupthink.
 
 ---
 
-## Task 10: Startup Ecosystem Access
+## Task 10: Professional Experience Diversity
 
-**Dimension**: Geographic Considerations (Priority 5)
+**Evaluation Focus**: Assess whether the founding team has diversity in professional backgrounds—different industries, company types, and functional areas.
 
-**Purpose**: Evaluate whether founders are located in startup ecosystems with access to talent, capital, and pattern recognition.
+**What to Evaluate**:
+- Do founders' work histories span different industries?
+- Is there a mix of startup experience and large company experience?
+- Do founders have experience in different functional areas (engineering, sales, operations, product)?
+- Does professional diversity suggest ability to see problems from multiple angles?
 
-**Evaluation Criteria**:
-- Examine `city` for ecosystem signals
-- Major startup hubs: San Francisco, New York, Seattle, Austin, Boston, Los Angeles, London, Singapore, Berlin, Tel Aviv, etc.
-- Consider quality of local startup infrastructure
-- Ecosystem access provides advantages but is not essential
-
-**Strong Signals (HIGH)**:
-- Founders located in major startup ecosystems
-- Access to relevant industry clusters (fintech in NYC, biotech in Boston)
-- Cities with strong venture capital presence
-- Hubs with relevant talent pools
-
-**Concerning Signals (LOW)**:
-- Founders in cities without startup infrastructure
-- Locations far from relevant industry ecosystems
-- No access to startup networks or capital
-- Isolation from pattern recognition and mentorship
-
-**Binary Choice**: LOW (poor ecosystem access) vs HIGH (strong ecosystem access)
+**Decision Criteria**:
+- **HIGH**: Founders have diverse professional backgrounds—different industries, mix of startup and corporate experience, different functional areas. Professional diversity suggests broad perspective and complementary networks.
+- **LOW**: Founders have homogeneous professional backgrounds—all from same industry, same company type, same functional area. Professional clustering suggests narrow perspective and potential blind spots.
 
 ---
 
-## Task 11: Team Size Appropriateness
+## Task 11: Commitment Level Assessment
 
-**Dimension**: Team Size (Priority 6)
+**Evaluation Focus**: Assess the overall commitment level of the founding team based on `commit_exclusively` and `in_school` flags.
 
-**Purpose**: Evaluate whether the number of founders is appropriate for effective startup execution.
+**What to Evaluate**:
+- How many founders have `commit_exclusively: true`?
+- Are there founders who are `in_school: true` and what does this imply for their commitment?
+- Is the team's overall commitment level appropriate for an early-stage startup?
+- Are commitment gaps concentrated in critical roles (e.g., CEO not committing exclusively)?
 
-**Evaluation Criteria**:
-- Count the number of founders in the group
-- 2-3 founders = statistical sweet spot
-- Solo founder = viable but higher risk (loneliness, limited bandwidth)
-- 4+ founders = coordination overhead, possible inability to make hard decisions
-
-**Strong Signals (HIGH)**:
-- 2-3 founders with clear role differentiation
-- Solo founder with exceptional background (can be appropriate)
-- 4 founders where fourth adds clearly differentiated value
-- Team size matches venture complexity
-
-**Concerning Signals (LOW)**:
-- 5+ founders (too many decision-makers)
-- Solo founder without exceptional justification
-- 4+ founders without clear differentiation
-- Team size suggesting "everyone we know" rather than deliberate selection
-
-**Binary Choice**: LOW (inappropriate team size) vs HIGH (appropriate team size)
+**Decision Criteria**:
+- **HIGH**: All or most founders are committing exclusively. Any student founders or part-time contributors are in appropriate supporting roles. Overall team commitment is appropriate for intensive early-stage startup work.
+- **LOW**: Few or no founders committing exclusively. Critical roles (CEO, CTO) are filled by part-time or student founders. Overall commitment level is insufficient for the demands of early-stage startup building.
 
 ---
 
-## Task 12: Background Diversity and Cognitive Diversity
+## Task 12: Team Size Appropriateness
 
-**Dimension**: Skill Complementarity (Priority 2)
+**Evaluation Focus**: Assess whether the team size is appropriate—neither too small to cover essential functions nor too large to coordinate efficiently.
 
-**Purpose**: Evaluate whether the team has diverse backgrounds that suggest cognitive diversity and complementary perspectives.
+**What to Evaluate**:
+- How many founders are on the team?
+- Does the team size match the functional coverage needed?
+- Are there signs of over-expansion (too many founders for the stage) or under-resourcing (critical gaps)?
+- Does the team size suggest appropriate coordination costs?
 
-**Evaluation Criteria**:
-- Examine `education`, `work_history`, `age`, and `gender` for diversity signals
-- Different educational backgrounds suggest different thinking styles
-- Varied work history indicates breadth of experience
-- Age diversity can balance energy and experience
-- Gender diversity often correlates with cognitive diversity
-
-**Strong Signals (HIGH)**:
-- Founders from different educational backgrounds (CS + MBA, engineering + design)
-- Varied work history across industries or functions
-- Mix of ages bringing different perspectives
-- Gender diversity on the team
-- Evidence of both technical and commercial experience
-
-**Concerning Signals (LOW)**:
-- All founders from identical backgrounds (same school, same company)
-- Homogeneous work history (all consultants, all from same startup)
-- No diversity in educational or professional backgrounds
-- Echo chamber composition
-
-**Binary Choice**: LOW (homogeneous backgrounds) vs HIGH (diverse backgrounds)
+**Decision Criteria**:
+- **HIGH**: Team size is appropriate—enough founders to cover essential functions (typically 2-4) without excessive coordination overhead. Each founder has a distinct, necessary role.
+- **LOW**: Team size is problematic—either solo founder with critical gaps and no plan to address them, or too many founders (5+) suggesting coordination challenges and equity dilution.
 
 ---
 
-## Task 13: Execution Evidence
+## Task 13: Exceptional Founder Signals
 
-**Dimension**: Holistic Capability Assessment
+**Evaluation Focus**: Assess whether any founders demonstrate exceptional capability through `hacked_system`, `impressive_thing`, `built_things`, or `accolades` fields.
 
-**Purpose**: Evaluate whether founders have demonstrated ability to ship and execute.
+**What to Evaluate**:
+- Are there compelling entries in the qualitative excellence fields?
+- Do the achievements demonstrate genuine agency, creativity, or execution capability?
+- Is there evidence of "relentlessly resourceful" behavior?
+- Do the accomplishments differentiate this team from typical founders?
 
-**Evaluation Criteria**:
-- Examine `built_things`, `impressive_thing`, `hacked_system`, and `work_history`
-- Look for evidence of prior shipping (products launched, companies built)
-- Consider creative problem-solving demonstrated in `hacked_system`
-- Evaluate quality of prior execution from `impressive_thing`
-
-**Strong Signals (HIGH)**:
-- Multiple founders with evidence in `built_things`
-- Impressive prior achievements in `impressive_thing`
-- Creative problem-solving in `hacked_system`
-- Work history showing progression and impact
-- Evidence of having shipped real products to real users
-
-**Concerning Signals (LOW)**:
-- No evidence of prior building in any founder
-- Empty or weak `built_things` across the team
-- No impressive achievements to point to
-- Work history suggesting observer rather than builder roles
-- All credentials, no demonstrated execution
-
-**Binary Choice**: LOW (limited execution evidence) vs HIGH (strong execution evidence)
+**Decision Criteria**:
+- **HIGH**: At least one founder has exceptional signals—creative hacks that demonstrate agency, impressive accomplishments beyond credentials, meaningful things built, or significant accolades. These signals suggest above-average execution capability.
+- **LOW**: No exceptional signals present, or signals present are unimpressive (participation awards, trivial projects, nothing that suggests extraordinary capability). Team is credential-heavy but accomplishment-light.
 
 ---
 
-## Task 14: Holistic Team Health Assessment
+## Task 14: Founder-Background Consistency
 
-**Dimension**: Integration Across All Dimensions
+**Evaluation Focus**: Assess whether founders' assigned roles are consistent with their backgrounds (education, work history) rather than arbitrary assignments.
 
-**Purpose**: Provide an overall assessment of team composition and dynamics, integrating signals across all dimensions.
+**What to Evaluate**:
+- Does the CTO have technical education and/or technical work history?
+- Does the CEO have leadership experience or business background?
+- Do role assignments match demonstrated expertise?
+- Are there credibility gaps between stated roles and actual backgrounds?
 
-**Evaluation Criteria**:
-- Consider the cumulative effect of all individual assessments
-- Apply the "Would you work for this team?" test
-- Look for patterns of strength or weakness across dimensions
-- Consider whether red flags are offset by exceptional strengths
-- Evaluate whether the team feels coherent and capable
-
-**Strong Signals (HIGH)**:
-- Consistent strength across multiple dimensions
-- No disqualifying red flags (no technical founder, equity dysfunction, commitment mismatch)
-- Team feels like a coherent unit with complementary capabilities
-- Would confidently recommend joining this team
-- Evidence suggests resilience under stress
-
-**Concerning Signals (LOW)**:
-- Multiple concerning patterns across dimensions
-- Presence of any disqualifying red flags
-- Team feels assembled from parts rather than unified
-- Would hesitate to recommend joining
-- Structural issues likely to surface under stress
-
-**Binary Choice**: LOW (concerning overall team health) vs HIGH (strong overall team health)
+**Decision Criteria**:
+- **HIGH**: Role assignments are consistent with backgrounds. Technical roles are held by people with technical backgrounds. Leadership roles are held by people with leadership experience. No obvious mismatches.
+- **LOW**: Role assignments are inconsistent with backgrounds. Founders claim roles they have no demonstrated experience for. Credibility gaps between titles and qualifications.
 
 ---
 
-## Task Summary
+## Task 15: Geographic and Demographic Diversity
 
-| # | Task Name | Dimension | Priority |
-|---|-----------|-----------|----------|
-| 1 | Exclusive Commitment Alignment | Commitment | 1 |
-| 2 | School Status Alignment | Commitment | 1 |
-| 3 | Technical Founder Presence | Skill Complementarity | 2 |
-| 4 | Builder-Seller Differentiation | Skill Complementarity | 2 |
-| 5 | Role Clarity and Differentiation | Skill Complementarity | 2 |
-| 6 | Equity Distribution Fairness | Equity Health | 3 |
-| 7 | Equity-Role Coherence | Equity Health | 3 |
-| 8 | Prior Working Relationship Evidence | Prior Relationships | 4 |
-| 9 | Geographic Co-location | Geography | 5 |
-| 10 | Startup Ecosystem Access | Geography | 5 |
-| 11 | Team Size Appropriateness | Team Size | 6 |
-| 12 | Background Diversity | Skill Complementarity | 2 |
-| 13 | Execution Evidence | Holistic Capability | — |
-| 14 | Holistic Team Health Assessment | Integration | — |
+**Evaluation Focus**: Assess whether the team has diversity in geographic origin, gender, age, and other demographic dimensions (when this information is available).
+
+**What to Evaluate**:
+- Are founders from different cities or regions?
+- Is there gender diversity on the team?
+- Is there age diversity (different generations or career stages)?
+- Does demographic diversity suggest access to different networks and perspectives?
+
+**Decision Criteria**:
+- **HIGH**: Team has meaningful diversity across available demographic dimensions—different locations, genders, ages. Diversity suggests access to varied networks, perspectives, and market understanding.
+- **LOW**: Team is demographically homogeneous across all available dimensions. Clustering suggests potential blind spots and limited network diversity.
 
 ---
 
-## Implementation Notes
+## Task 16: Holistic Team Composition Assessment
 
-1. **Input Format**: Each task receives a founder group (array of founder objects) formatted as a readable text representation of the structured data.
+**Evaluation Focus**: Provide an overall holistic assessment of the team's composition, synthesizing across all individual dimensions.
 
-2. **Binary Responses**: Each task outputs a binary LOW/HIGH assessment, where HIGH indicates the team scores well on that dimension.
+**What to Evaluate**:
+- Does the team feel like a coherent unit with complementary strengths?
+- Are there fatal gaps that cannot be easily addressed?
+- Do the team's strengths outweigh its weaknesses?
+- Would this team be well-positioned to execute on an early-stage startup?
 
-3. **Score Aggregation**: Individual task scores are normalized to produce a probability distribution across founder groups, with higher aggregate scores indicating healthier team dynamics.
+**Decision Criteria**:
+- **HIGH**: Holistically, this team has strong composition—complementary skills, clear leadership, appropriate commitment, and genuine diversity. Gaps are addressable. The team feels like a system poised for execution.
+- **LOW**: Holistically, this team has problematic composition—critical gaps, unclear leadership, misaligned equity, homogeneous backgrounds, or insufficient commitment. Structural issues would impede execution regardless of idea quality.
 
-4. **Priority Weighting**: While all tasks contribute to the final ranking, the priority ordering reflects the relative importance of each dimension—commitment issues should weigh more heavily than geographic distribution.
+---
 
-5. **Red Flag Detection**: Tasks 1-3 and 6 are designed to surface potential disqualifying issues. A team failing on these dimensions faces structural challenges that are difficult to overcome.
+## Task Aggregation Notes
+
+All tasks produce binary LOW/HIGH assessments that are converted to probability distributions across the input founder groups. The final ranking aggregates across all tasks to produce a comparative ranking of teams.
+
+Each task should evaluate all founder groups in the input and produce scores that, when normalized, indicate relative team strength on that dimension. A team that is HIGH on a dimension receives a higher share of the probability mass than a team that is LOW.
