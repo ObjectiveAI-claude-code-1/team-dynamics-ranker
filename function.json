@@ -1,0 +1,681 @@
+{
+  "type": "vector.function",
+  "description": "Rank founder groups by team composition and dynamics. Returns a probability distribution where higher values indicate healthier team dynamics. Evaluates commitment alignment, skill complementarity, equity distribution health, prior relationships, geographic considerations, and team size across 14 dimensions.",
+  "input_schema": {
+    "type": "object",
+    "description": "Input for ranking founder groups by team composition and dynamics",
+    "properties": {
+      "items": {
+        "type": "array",
+        "description": "Array of founder groups to rank. Each group is an array of founder objects representing a founding team.",
+        "minItems": 2,
+        "items": {
+          "type": "array",
+          "description": "A founder group (founding team) containing one or more founder objects",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "description": "A founder within the team",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Founder's name"
+              },
+              "role": {
+                "type": "string",
+                "description": "Declared role (CEO, CTO, COO, Co-founder, etc.)"
+              },
+              "percent_equity": {
+                "type": "integer",
+                "description": "Ownership stake (0-100)",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "technical_founder": {
+                "type": "boolean",
+                "description": "Whether founder has technical/engineering capability"
+              },
+              "in_school": {
+                "type": "boolean",
+                "description": "Whether founder is currently a student"
+              },
+              "commit_exclusively": {
+                "type": "boolean",
+                "description": "Whether founder is committed full-time to venture"
+              },
+              "age": {
+                "type": "integer",
+                "description": "Founder's age"
+              },
+              "gender": {
+                "type": "string",
+                "description": "Founder's gender"
+              },
+              "city": {
+                "type": "string",
+                "description": "Current city of residence"
+              },
+              "education": {
+                "type": "array",
+                "description": "Educational background",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "institution": {
+                      "type": "string"
+                    },
+                    "degree": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    },
+                    "graduation_year": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "work_history": {
+                "type": "array",
+                "description": "Work experience",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "company": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "start_year": {
+                      "type": "integer"
+                    },
+                    "end_year": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "hacked_system": {
+                "type": "string",
+                "description": "Description of creative problem-solving"
+              },
+              "impressive_thing": {
+                "type": "string",
+                "description": "Most impressive prior achievement"
+              },
+              "built_things": {
+                "type": "string",
+                "description": "Description of things they've built"
+              },
+              "accolades": {
+                "type": "string",
+                "description": "Awards, recognition, external validation"
+              }
+            },
+            "required": [
+              "name",
+              "role",
+              "percent_equity",
+              "technical_founder",
+              "in_school",
+              "commit_exclusively"
+            ]
+          }
+        }
+      }
+    },
+    "required": [
+      "items"
+    ]
+  },
+  "input_maps": [
+    {
+      "$starlark": "input['items']"
+    }
+  ],
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing founder team EXCLUSIVE COMMITMENT ALIGNMENT. Evaluate whether all founders have committed exclusively to the venture.\n\nConsider:\n- Check the commit_exclusively field for all founders in the group\n- All founders with commit_exclusively: true indicates strong alignment\n- Mixed commitment levels (some true, some false) indicate concerning asymmetry\n- Commitment asymmetry breeds resentment and fractures decision-making\n\nStrong signals (HIGH):\n- All founders have commit_exclusively: true\n- Evidence of burned bridges in work history (quit stable jobs)\n- Full dedication to the venture\n\nConcerning signals (LOW):\n- Mixed commit_exclusively values within the team\n- Founders maintaining other jobs or commitments\n- Part-time founders with founder equity\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Mixed or absent exclusive commitment. Some founders are not fully dedicated, creating asymmetry that breeds resentment and fractures decision-making."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Universal exclusive commitment. All founders are fully dedicated to the venture with aligned skin in the game."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing founder team SCHOOL STATUS ALIGNMENT. Evaluate whether founders have aligned academic status.\n\nConsider:\n- Check the in_school field for all founders\n- All founders in school together = aligned cohort (acceptable)\n- All founders not in school = full-time alignment (ideal)\n- Mixed in_school status = commitment mismatch (concerning)\n\nStrong signals (HIGH):\n- All founders have in_school: false (full-time availability)\n- All founders have in_school: true (cohort with aligned constraints)\n- Consistent academic status across the team\n\nConcerning signals (LOW):\n- Some founders in school, others not\n- Part-time students paired with full-time founders\n- School commitments that will compete with startup demands\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Mixed school status. Some founders are in school while others are not, creating structural friction and commitment mismatch."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Aligned school status. All founders are either in school together or all out of school, enabling consistent time commitment."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing TECHNICAL FOUNDER PRESENCE. Evaluate whether the team has at least one technical founder who can build the product.\n\nConsider:\n- Check the technical_founder field across the team\n- At least one technical_founder: true is essential for most startups\n- Multiple technical founders may be appropriate for deep-tech plays\n- Zero technical founders is a critical gap for technology companies\n\nStrong signals (HIGH):\n- At least one founder with technical_founder: true\n- Technical founder holds meaningful equity stake\n- Technical capability evident from work history or built_things\n\nConcerning signals (LOW):\n- No founder with technical_founder: true\n- All founders are non-technical (all business backgrounds)\n- Plan to outsource core technical work\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - No technical founder present. The team lacks the ability to build the product themselves, a critical gap for technology companies."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Technical founder present. At least one founder has technical capability to build the product."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing BUILDER-SELLER DIFFERENTIATION. Evaluate whether the team has clear role differentiation between building (product/engineering) and selling (business/commercial) functions.\n\nConsider:\n- Examine roles, technical_founder flags, and work history for skill signals\n- Classic pairing: technical founder + business/commercial founder\n- Look for evidence of complementary rather than overlapping skills\n- Consider whether the team can both build AND sell\n\nStrong signals (HIGH):\n- Clear technical + business pairing (e.g., CTO + CEO with sales background)\n- Roles that indicate complementary functions\n- Work history showing different domain expertise\n- Evidence of prior shipping AND prior selling\n\nConcerning signals (LOW):\n- All founders with identical backgrounds (three engineers, four MBAs)\n- Roles that overlap without complementing (two CTOs, three visionaries)\n- No commercial/business founder in a complex sales environment\n- Skills that duplicate rather than complete each other\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Poor builder-seller differentiation. All founders have similar backgrounds or skills that overlap rather than complement each other."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Clear builder-seller complementarity. The team has both technical building capability and business/commercial skills."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing ROLE CLARITY AND DIFFERENTIATION. Evaluate whether founders have distinct, clearly defined roles that enable parallel execution.\n\nConsider:\n- Examine the role field for each founder\n- Look for distinct functional roles (CEO, CTO, COO, CPO, etc.)\n- Watch for role confusion signals (multiple CEOs, vague titles)\n- Consider whether roles match founder backgrounds\n\nStrong signals (HIGH):\n- Distinct roles across founders (CEO + CTO + COO pattern)\n- Roles that match technical_founder status and work history\n- Clear division of responsibilities evident from role titles\n- Solo founder with clear singular leadership (100% equity)\n\nConcerning signals (LOW):\n- Multiple founders with same or similar roles\n- Vague roles like \"Co-founder\" without functional specification\n- Role titles that don't match evident backgrounds\n- All founders claiming CEO or \"visionary\" status\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Role confusion or overlap. Founders have vague, duplicate, or conflicting roles that will impede parallel execution."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Clear role differentiation. Each founder has a distinct, well-defined role enabling parallel execution."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing EQUITY DISTRIBUTION FAIRNESS. Evaluate whether the equity split reflects mutual respect and will pass the \"resentment test\" over time.\n\nConsider:\n- Examine percent_equity across all founders\n- Roughly equal splits (50/50, 33/33/34, 40/40/20) suggest mutual respect\n- Very small stakes for ostensible co-founders (single digits) are concerning\n- Solo founders with 100% is healthy (clear authority)\n- Equity should roughly correspond to role seniority and commitment\n\nStrong signals (HIGH):\n- Roughly equal splits among co-founders (within 20% of each other)\n- Deviations that match clear experience/role differences\n- Solo founder with 100% (clear decision-making authority)\n- No founder with less than 10% unless clearly an advisor\n\nConcerning signals (LOW):\n- One founder with 80%+ while peers have minimal stakes\n- Co-founders with single-digit equity (suggests exploitation)\n- Equity splits that contradict role descriptions\n- Very equal splits among 5+ founders (suggests non-decision)\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Concerning equity distribution. The split suggests exploitation, miscalibration, or will likely fail the resentment test over time."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Healthy equity distribution. The split reflects mutual respect and appropriately matches roles and contributions."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing EQUITY-ROLE COHERENCE. Evaluate whether equity stakes are coherent with declared roles and implied contributions.\n\nConsider:\n- Compare percent_equity against role and other signals\n- CEO typically should have meaningful stake if leading\n- Technical founders should have equity reflecting their building contribution\n- Equity should tell a coherent story about relative value\n\nStrong signals (HIGH):\n- Lead role (CEO) corresponds with meaningful equity stake\n- Technical founders have equity proportional to building responsibility\n- Equity distribution tells a coherent story matching roles\n- No obvious mismatches between title and stake\n\nConcerning signals (LOW):\n- CEO with tiny equity stake (who really leads?)\n- Technical founder with minimal equity (will they stay?)\n- Equity splits that contradict the role structure\n- \"Advisor\" equity levels for people with \"Founder\" titles\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Equity-role mismatch. Equity stakes don't coherently match the declared roles and implied contributions."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Equity-role coherence. Stakes appropriately reflect roles and tell a coherent story about relative value."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing PRIOR WORKING RELATIONSHIP EVIDENCE. Evaluate whether founders have evidence of successful prior collaboration.\n\nConsider:\n- Examine work_history for overlapping companies or time periods\n- Look for shared education institutions or locations\n- Consider built_things that might reference shared projects\n- Founder relationships are marriages with money—prior collaboration reduces risk\n\nStrong signals (HIGH):\n- Overlapping companies in work_history\n- Shared educational institutions at same time periods\n- References to joint projects in built_things\n- Long-term geographic proximity suggesting established relationship\n\nConcerning signals (LOW):\n- No overlap in work_history or educational background\n- Founders from completely different industries/locations\n- No evidence of prior collaboration\n- Very recent relationship (startup-dating pattern)\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - No prior relationship evidence. Founders appear to have no history of working together, increasing co-founder risk."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Clear prior relationship signals. Evidence suggests founders have successfully collaborated before."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing GEOGRAPHIC CO-LOCATION. Evaluate whether founders are co-located for optimal early-stage execution.\n\nConsider:\n- Examine city field for all founders\n- All founders in same city = ideal co-location\n- Founders distributed across cities = execution friction\n- Consider proximity even if not same city (adjacent metros)\n\nStrong signals (HIGH):\n- All founders in the same city\n- All founders in same metropolitan area\n- Evidence of relocation to work together\n- Solo founder (co-location not applicable)\n\nConcerning signals (LOW):\n- Founders distributed across multiple cities\n- International distribution across time zones\n- No evidence of plans to consolidate\n- Major cities with poor connectivity (e.g., SF + Singapore)\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Distributed team. Founders are in different cities, creating execution friction and communication challenges."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Co-located team. All founders are in the same city or metropolitan area, enabling close collaboration."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing STARTUP ECOSYSTEM ACCESS. Evaluate whether founders are located in startup ecosystems with access to talent, capital, and pattern recognition.\n\nConsider:\n- Examine city for ecosystem signals\n- Major startup hubs: San Francisco, New York, Seattle, Austin, Boston, Los Angeles, London, Singapore, Berlin, Tel Aviv, etc.\n- Consider quality of local startup infrastructure\n- Ecosystem access provides advantages but is not essential\n\nStrong signals (HIGH):\n- Founders located in major startup ecosystems\n- Access to relevant industry clusters (fintech in NYC, biotech in Boston)\n- Cities with strong venture capital presence\n- Hubs with relevant talent pools\n\nConcerning signals (LOW):\n- Founders in cities without startup infrastructure\n- Locations far from relevant industry ecosystems\n- No access to startup networks or capital\n- Isolation from pattern recognition and mentorship\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Poor ecosystem access. Founders are located outside major startup ecosystems, limiting access to talent, capital, and mentorship."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Strong ecosystem access. Founders are in major startup hubs with access to relevant talent, capital, and networks."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing TEAM SIZE APPROPRIATENESS. Evaluate whether the number of founders is appropriate for effective startup execution.\n\nConsider:\n- Count the number of founders in the group\n- 2-3 founders = statistical sweet spot\n- Solo founder = viable but higher risk (loneliness, limited bandwidth)\n- 4+ founders = coordination overhead, possible inability to make hard decisions\n\nStrong signals (HIGH):\n- 2-3 founders with clear role differentiation\n- Solo founder with exceptional background (can be appropriate)\n- 4 founders where fourth adds clearly differentiated value\n- Team size matches venture complexity\n\nConcerning signals (LOW):\n- 5+ founders (too many decision-makers)\n- Solo founder without exceptional justification\n- 4+ founders without clear differentiation\n- Team size suggesting \"everyone we know\" rather than deliberate selection\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Inappropriate team size. Too many founders creating coordination overhead, or solo founder without sufficient justification."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Appropriate team size. 2-3 founders in the sweet spot, or team size is well-justified for the venture."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing BACKGROUND DIVERSITY AND COGNITIVE DIVERSITY. Evaluate whether the team has diverse backgrounds that suggest cognitive diversity and complementary perspectives.\n\nConsider:\n- Examine education, work_history, age, and gender for diversity signals\n- Different educational backgrounds suggest different thinking styles\n- Varied work history indicates breadth of experience\n- Age diversity can balance energy and experience\n- Gender diversity often correlates with cognitive diversity\n\nStrong signals (HIGH):\n- Founders from different educational backgrounds (CS + MBA, engineering + design)\n- Varied work history across industries or functions\n- Mix of ages bringing different perspectives\n- Gender diversity on the team\n- Evidence of both technical and commercial experience\n\nConcerning signals (LOW):\n- All founders from identical backgrounds (same school, same company)\n- Homogeneous work history (all consultants, all from same startup)\n- No diversity in educational or professional backgrounds\n- Echo chamber composition\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Homogeneous backgrounds. All founders share similar backgrounds, creating an echo chamber with limited cognitive diversity."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Diverse backgrounds. Team shows cognitive diversity through varied education, experience, or demographics."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator assessing EXECUTION EVIDENCE. Evaluate whether founders have demonstrated ability to ship and execute.\n\nConsider:\n- Examine built_things, impressive_thing, hacked_system, and work_history\n- Look for evidence of prior shipping (products launched, companies built)\n- Consider creative problem-solving demonstrated in hacked_system\n- Evaluate quality of prior execution from impressive_thing\n\nStrong signals (HIGH):\n- Multiple founders with evidence in built_things\n- Impressive prior achievements in impressive_thing\n- Creative problem-solving in hacked_system\n- Work history showing progression and impact\n- Evidence of having shipped real products to real users\n\nConcerning signals (LOW):\n- No evidence of prior building in any founder\n- Empty or weak built_things across the team\n- No impressive achievements to point to\n- Work history suggesting observer rather than builder roles\n- All credentials, no demonstrated execution\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Limited execution evidence. Little or no evidence that founders have shipped products or demonstrated ability to execute."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Strong execution evidence. Founders have demonstrable track record of building and shipping."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    },
+    {
+      "type": "vector.completion",
+      "map": 0,
+      "messages": [
+        {
+          "role": "system",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are an expert evaluator providing a HOLISTIC TEAM HEALTH ASSESSMENT. Consider the cumulative effect of all individual assessments and provide an overall evaluation.\n\nConsider:\n- Apply the \"Would you work for this team?\" test\n- Look for patterns of strength or weakness across dimensions\n- Consider whether red flags are offset by exceptional strengths\n- Evaluate whether the team feels coherent and capable\n- Consider commitment, skills, equity, relationships, geography, and team size\n\nStrong signals (HIGH):\n- Consistent strength across multiple dimensions\n- No disqualifying red flags (no technical founder, equity dysfunction, commitment mismatch)\n- Team feels like a coherent unit with complementary capabilities\n- Would confidently recommend joining this team\n- Evidence suggests resilience under stress\n\nConcerning signals (LOW):\n- Multiple concerning patterns across dimensions\n- Presence of any disqualifying red flags\n- Team feels assembled from parts rather than unified\n- Would hesitate to recommend joining\n- Structural issues likely to surface under stress\n\nYou must choose between LOW or HIGH."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": {
+            "$starlark": "[{'type': 'text', 'text': 'FOUNDER GROUP:\\n\\n' + '\\n\\n'.join(['Founder ' + str(i+1) + ':\\n  Name: ' + str(f.get('name', 'N/A')) + '\\n  Role: ' + str(f.get('role', 'N/A')) + '\\n  Equity: ' + str(f.get('percent_equity', 'N/A')) + '%\\n  Technical Founder: ' + str(f.get('technical_founder', 'N/A')) + '\\n  In School: ' + str(f.get('in_school', 'N/A')) + '\\n  Commits Exclusively: ' + str(f.get('commit_exclusively', 'N/A')) + '\\n  Age: ' + str(f.get('age', 'N/A')) + '\\n  Gender: ' + str(f.get('gender', 'N/A')) + '\\n  City: ' + str(f.get('city', 'N/A')) + '\\n  Education: ' + str(f.get('education', [])) + '\\n  Work History: ' + str(f.get('work_history', [])) + '\\n  Built Things: ' + str(f.get('built_things', 'N/A')) + '\\n  Impressive Thing: ' + str(f.get('impressive_thing', 'N/A')) + '\\n  Hacked System: ' + str(f.get('hacked_system', 'N/A')) + '\\n  Accolades: ' + str(f.get('accolades', 'N/A')) for i, f in enumerate(map)])}]"
+          }
+        }
+      ],
+      "responses": [
+        [
+          {
+            "type": "text",
+            "text": "LOW - Concerning overall team health. Multiple red flags or structural issues that will likely surface under stress."
+          }
+        ],
+        [
+          {
+            "type": "text",
+            "text": "HIGH - Strong overall team health. Coherent team with complementary capabilities and no disqualifying red flags."
+          }
+        ]
+      ],
+      "output": {
+        "$starlark": "(lambda scores: [s / sum(scores) if sum(scores) > 0 else 1.0 / len(scores) for s in scores])([o['scores'][1] for o in output])"
+      }
+    }
+  ],
+  "output_length": {
+    "$starlark": "len(input['items'])"
+  },
+  "input_split": {
+    "$starlark": "[{'items': [item]} for item in input['items']]"
+  },
+  "input_merge": {
+    "$starlark": "{'items': [sub['items'][0] for sub in input]}"
+  }
+}
